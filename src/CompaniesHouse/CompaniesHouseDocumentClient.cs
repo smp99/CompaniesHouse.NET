@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using CompaniesHouse.Response.Document;
@@ -18,10 +19,18 @@ namespace CompaniesHouse
             _documentUriBuilder = documentUriBuilder;
         }
 
-        public async Task<CompaniesHouseClientResponse<DocumentDownload>> DownloadDocumentAsync(string documentId, CancellationToken cancellationToken = default)
+        public async Task<CompaniesHouseClientResponse<DocumentDownload>> DownloadDocumentAsync(string documentId, CancellationToken cancellationToken = default, string contentType = default)
         {
             var requestUri = _documentUriBuilder.WithContent().Build(documentId);
-            var response = await _httpClient.GetAsync(requestUri, cancellationToken).ConfigureAwait(false);
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
+            if (!string.IsNullOrEmpty(contentType))
+            {
+                requestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(contentType));
+            }
+
+            var response = await _httpClient.SendAsync(requestMessage).ConfigureAwait(false);
 
             if (response.StatusCode != HttpStatusCode.NotFound)
                 response.EnsureSuccessStatusCode();
@@ -29,7 +38,7 @@ namespace CompaniesHouse
             var data = response.IsSuccessStatusCode
                 ? new DocumentDownload
                 {
-                    Content = await response.Content.ReadAsStreamAsync(),
+                    Content = await response.Content.ReadAsStreamAsync().ConfigureAwait(false),
                     ContentLength = response.Content.Headers.ContentLength,
                     ContentType = response.Content.Headers.ContentType.MediaType
                 }

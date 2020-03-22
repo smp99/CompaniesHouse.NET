@@ -5,16 +5,24 @@ using NUnit.Framework;
 
 namespace CompaniesHouse.IntegrationTests.Tests.DocumentTests
 {
-    [TestFixture]
+    [TestFixture("Mw2JX3NUZqy8_TwPkbHJSsZH1Xz-MygUbnurqpZZwvU", null)]
+    [TestFixture("Mw2JX3NUZqy8_TwPkbHJSsZH1Xz-MygUbnurqpZZwvU", "application/pdf")]
     public class DocumentDownloadTests : DocumentTestBase<DocumentDownload>
     {
-        private const string DocumentId = "Mw2JX3NUZqy8_TwPkbHJSsZH1Xz-MygUbnurqpZZwvU";
+        private readonly string _documentId;
+        private readonly string _requestedContentType;
         private CompaniesHouseClientResponse<DocumentDownload> _result;
+
+        public DocumentDownloadTests(string documentId, string requestedContentType)
+        {
+            _documentId = documentId;
+            requestedContentType = _requestedContentType;
+        }
 
         [SetUp]
         protected override async Task When() => await DownloadingDocument();
 
-        private async Task DownloadingDocument() => _result = await Client.DownloadDocumentAsync(DocumentId);
+        private async Task DownloadingDocument() => _result = await Client.DownloadDocumentAsync(_documentId, contentType: _requestedContentType);
 
         [Test]
         public async Task ThenDocumentContentIsNotEmpty()
@@ -40,5 +48,24 @@ namespace CompaniesHouse.IntegrationTests.Tests.DocumentTests
 
         [Test]
         public void ThenDocumentDataIsNull() => Assert.Null(_result.Data);
+    }
+
+    [TestFixture]
+    public class DocumentDownloadTestsInvalidContentType : DocumentTestBase<DocumentDownload>
+    {
+        private const string _documentId = "";
+        private const string _requestedContentType = "";
+        
+        [SetUp]
+        protected override async Task When()
+        {
+
+        }
+
+        [Test]
+        public void ThenThrows406Error()
+        {
+            Assert.ThrowsAsync<System.Exception>(async () => await Client.DownloadDocumentAsync(_documentId, contentType: _requestedContentType));
+        }
     }
 }

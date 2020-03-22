@@ -106,9 +106,9 @@ namespace CompaniesHouse
             return _companiesHouseDocumentMetadataClient.GetDocumentMetadataAsync(documentId, caneCancellationToken);
         }
 
-        public Task<CompaniesHouseClientResponse<DocumentDownload>> DownloadDocumentAsync(string documentId, CancellationToken cancellationToken = default)
+        public Task<CompaniesHouseClientResponse<DocumentDownload>> DownloadDocumentAsync(string documentId, CancellationToken cancellationToken = default, string contentType = default)
         {
-            return _companiesHouseDocumentClient.DownloadDocumentAsync(documentId, cancellationToken);
+            return _companiesHouseDocumentClient.DownloadDocumentAsync(documentId, cancellationToken, contentType);
         }
 		
 		public Task<CompaniesHouseClientResponse<PersonsWithSignificantControl>> GetPersonsWithSignificantControlAsync(string companyNumber, int startIndex = 0, int pageSize = 25, CancellationToken cancellationToken = default(CancellationToken))
